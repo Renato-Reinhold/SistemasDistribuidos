@@ -1,38 +1,48 @@
 from datetime import datetime
 import socket
-import pickle
 import re
 
 #taxa vai ser de 5%
-def VisaPaymentService():
-    try:
-        servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        servidor.bind(('127.0.0.1', 8900))
-        servidor.listen(5)
-        print("Servidor ouvindo a porta 8900")
+HOST = '127.0.0.1'
+PORT = 8900
 
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.bind((HOST, PORT))
+    s.listen()
+    conn, addr = s.accept()
+    with conn:
+        print(f'Conectado por {addr}')
         while True:
+            data = conn.recv(1024).decode('utf-8')
+            print(f'Requisição recebida: {data}')
 
-            cliente, endereco = servidor.accept()
-            print(f"Cliente conectado: {endereco[0]}")
+            if not data:
+                break
 
-            dados_recebidos = cliente.recv(4096)
-            parametros = pickle.loads(dados_recebidos)
-            num_cartao = parametros['num_cartao']
-            valida_visa(num_cartao)
-            valida_nome(parametros['nome'])
-            valida_data_expiracao(parametros['data_expiracao'])
-            valor_trans = parametros['valor_trans']
+            if data == 'PAY':
+                conn.sendall('Solicita efetuacao de pagamento'.encode('utf-8'))
+                conn.sendall('N° do cartão'.encode('utf-8'))
+                conn.sendall('Nome do cartão'.encode('utf-8'))
+                conn.sendall('Data de expiração do cartão (MM/yyyy)'.encode('utf-8'))
+                conn.sendall('Valor da transação'.encode('utf-8'))
+                conn.sendall('Confirma a transação'.encode('utf-8'))
 
-            print(f"Parâmetros recebidos: {parametros}")
+                numero_cartao = conn.recv(1024).decode('utf-8')
+                nome_cartao = conn.recv(1024).decode('utf-8')
+                data_expiracao = conn.recv(1024).decode('utf-8')
+                valor_transacao = conn.recv(1024).decode('utf-8')
+                confirmacao = conn.recv(1024).decode('utf-8')
 
-            cliente.sendall(b"Dados complexos recebidos com sucesso!")
-            cliente.close()
+                if confirmacao == 'COMMIT':
+                    print('Transação aprovada!')
+                    conn.sendall('OK (1ª linha)'.encode('utf-8'))
+                    conn.sendall(f'Dados da transação* (2ª linha): {numero_cartao}:{nome_cartao}:{data_expiracao}:{valor_transacao}'.encode('utf-8'))
+                else:
+                    print('Transação cancelada!')
+                    conn.sendall('NOK'.encode('utf-8'))
 
-            cliente.close()
-
-    except Exception as e:
-        print("Erro:", str(e))
+            else:
+                conn.sendall('OK'.encode('utf-8'))
 
 def valida_data_expiracao(data):
     data = datetime.strptime(data, "%m/%Y")
