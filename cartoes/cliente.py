@@ -4,13 +4,13 @@ import pickle
 def cliente(parametros):
     try:
         cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        cliente.connect(('127.0.0.1', 8900))
+        cliente.connect(('127.0.0.1', 8901))
 
         dados = pickle.dumps(parametros)
         cliente.sendall(dados)
 
         resposta = cliente.recv(1024).decode('utf-8')
-        print(f"Resposta do servidor: {resposta}")
+        
 
         cliente.close()
         print("Conexão encerrada")

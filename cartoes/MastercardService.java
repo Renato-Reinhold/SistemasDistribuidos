@@ -23,32 +23,27 @@ public class MastercardService {
                 System.out.println("Cliente conectado: " + clientSocket.getInetAddress());
 
                 try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-                     ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
-                     ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream())) {
+                    ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
+                    ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream())) {
 
                     Map<String, Object> data = (Map<String, Object>) in.readObject();
                     System.out.println("Cliente: " + data);
                     
-                    if("PAYMENT".equals(data.get("servico"))) {
-                    	System.out.println(data);
-                    	String ppNCartao = (String) data.get("ppNCartao");
-                    	String spNCartao = (String) data.get("spNCartao");
-                    	String tpNCartao = (String) data.get("tpNCartao");
-                    	String qpNCartao = (String) data.get("qpNCartao");
-                    	String nomeCartao = (String) data.get("nomeCartao");
-                    	String dataExpiracao = (String) data.get("dataExpiracao");
-                    	String valor = (String) data.get("valor");
+                    System.out.println(data);
+                    String ppNCartao = (String) data.get("ppNCartao");
+                    String spNCartao = (String) data.get("spNCartao");
+                    String tpNCartao = (String) data.get("tpNCartao");
+                    String qpNCartao = (String) data.get("qpNCartao");
+                    String nomeCartao = (String) data.get("nomeCartao");
+                    String dataExpiracao = (String) data.get("dataExpiracao");
+                    String valor = (String) data.get("valor");
                     	
-                    	String numeroCartao = ppNCartao.concat(spNCartao).
+                    String numeroCartao = ppNCartao.concat(spNCartao).
                     			concat(tpNCartao).concat(qpNCartao);
                     	
-                    	if(isCardNumberValid(numeroCartao) 
-                    			&& isClientNameValid(nomeCartao)
-                    			&& isExpirationDateValid(dataExpiracao)
-                    			&& isTransactionValueValid(valor)) {
-                    		objectOut.writeObject("Fazer o pagamento aplicando a taxa comissao");
-                    	}                 	
-                    }
+                    if(isCardNumberValid(numeroCartao)) {
+                    	objectOut.writeObject("Fazer o pagamento aplicando a taxa comissao");
+                    }                 	
                     
                     objectOut.flush();
                     objectOut.close();

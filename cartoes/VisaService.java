@@ -23,34 +23,29 @@ public class VisaService {
                 System.out.println("Cliente conectado: " + clientSocket.getInetAddress());
 
                 try (PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-                        ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
-                        ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream())) {
+                    ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
+                    ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream())) {
 
-                       Map<String, Object> data = (Map<String, Object>) in.readObject();
-                       System.out.println("Cliente: " + data);
+                    Map<String, Object> data = (Map<String, Object>) in.readObject();
+                    System.out.println("Cliente: " + data);
                        
-                       if("PAY".equals(data.get("servico"))) {
-                    	   System.out.println(data);
-                    	   String numeroCartao = (String) data.get("numeroCartao");
-                    	   String nomeCartao = (String) data.get("nomeCartao");
-                    	   String dataExpiracao = (String) data.get("dataExpiracao");
-                    	   String valor = (String) data.get("valor");
+                    System.out.println(data);
+                    String numeroCartao = (String) data.get("numeroCartao");
+                    String nomeCartao = (String) data.get("nomeCartao");
+                    String dataExpiracao = (String) data.get("dataExpiracao");
+                    String valor = (String) data.get("valor");
                     	   
-                    	   if(isCardNumberValid(numeroCartao) 
-                    			   && isClientNameValid(nomeCartao)
-                    			   && isExpirationDateValid(dataExpiracao)
-                    			   && isTransactionValueValid(valor)) {
-                    		   objectOut.writeObject("Fazer o pagamento aplicando a taxa comissao");
-                       		}                 	
-                       }
+                    if(isCardNumberValid(numeroCartao)) {
+                    	objectOut.writeObject("Fazer o pagamento aplicando a taxa comissao");
+                    }                 	
                        
-                       objectOut.flush();
-                       objectOut.close();
-                       in.close();
+                    objectOut.flush();
+                    objectOut.close();
+                    in.close();
                        
-                   } catch (IOException | ClassNotFoundException e) {
-                       System.out.println("Erro ao processar a requisição: " + e.getMessage());
-                   }
+                } catch (IOException | ClassNotFoundException e) {
+                    System.out.println("Erro ao processar a requisição: " + e.getMessage());
+                }
             }
         } catch (IOException e) {
             System.out.println("Erro ao iniciar o servidor: " + e.getMessage());

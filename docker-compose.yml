@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+
+  database:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: mydatabase
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  app:
+    image: node:14
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: "npm start"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+
+volumes:
+  db_data:
